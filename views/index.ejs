@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .content::-webkit-scrollbar{
+            display: none;
+        }
+        .content p{
+            padding: 4px;
+            background-color: rgb(109, 109, 100);
+            width: fit-content;
+             border-radius: 3px;
+             margin-top: 2px;
+        }
+        .content p.self{
+            background-color: rgb(153, 153, 153);
+            align-self: flex-end;
+        }
+    </style>
+</head>
+<body>
+    <div class="main h-screen w-full bg-zinc-800 lg:p-10 p-2">
+        <h1 class="text-4xl text-white text-center mt-5">Chatting App</h1>
+        <div class=" bg-zinc-700 h-[80%] lg:w-[40%] w-full rounded-lg mt-10 lg:ml-[30%] relative p-2">
+            <div class="top-text h-14 w-full bg-zinc-600 text-white flex items-center justify-between rounded-lg p-2">
+                <h1 class="text-xl">Chat</h1>
+                <p id="socket-id" class="text-stone-200">socket</p>
+            </div>
+            <div class="content text-white text-lg h-full w-full overflow-y-auto overflow-hidden mt-5 flex flex-col"></div>
+            <div class="flex flex-col lg:gap-3 gap-1 absolute bottom-2 left-2 w-full"  action="">
+                <input class="room px-6 py-2 rounded-lg outline-none bg-zinc-600 text-white w-[75%]" type="text" placeholder="Room...">
+                <input class="text px-6 py-2 rounded-lg outline-none bg-zinc-600 text-white w-[75%]" type="text" placeholder="Write your message here...">
+                <input class="submit px-6 py-2 rounded-lg bg-blue-700 text-white cursor-pointer w-[75%]" type="submit" value="Send" name="" id="">
+            </div>
+        </div>
+    </div>
+    
+    
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
+    <script>
+        let socket = io(); 
+        let inp = document.querySelector(".text");
+        let btn = document.querySelector(".submit");
+        let content = document.querySelector(".content");
+        let socketId = document.querySelector("#socket-id");
+        let inputRoom = document.querySelector(".room");
+
+        socket.on("socketId", function(data){
+            socketId.textContent = data
+        })
+
+        inputRoom.addEventListener("change", function(){
+            let room = inputRoom.value;
+            socket.emit("joinRoom", room)
+        })
+
+        btn.addEventListener("click", function(evt){
+            let room = inputRoom.value;
+            let message = inp.value;
+
+            socket.emit("msg",{room,  message});
+            inp.value = ""
+        });
+        socket.on("recieve-msg", function(data){
+            let newContent = document.createElement("p");
+            newContent.textContent = data.text
+            console.log(data.text);
+            if(data.id === socket.id){
+                newContent.classList.add("self")
+            }
+            content.append(newContent);
+            content.scrollTop = content.scrollHeight
+        })
+        
+        
+    </script>
+</body>
+</html>
